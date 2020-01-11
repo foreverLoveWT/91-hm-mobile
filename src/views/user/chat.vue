@@ -1,10 +1,12 @@
 <template>
-  <div>小智同学</div>
+  <div class="container">
+    <van-nav-bar left-arrow title="小智同学" @click-left="$router.back()"></van-nav-bar>
+  </div>
 </template>
 
 <script>
 export default {
-  name: 'chat'
+  name: 'user-chat'
 }
 </script>
 
