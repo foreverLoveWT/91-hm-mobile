@@ -17,11 +17,12 @@ const instance = axios.create({
 
 // 请求拦截器注入Token
 instance.interceptors.request.use(function (config) {
+  // debugger
   if (store.state.user.token) {
     // config.headers['Authorization'] = `Bearer ${store.state.user.token}`
     config.headers.Authorization = `Bearer ${store.state.user.token}`
-    return config
   }
+  return config
 }, function (error) {
   return Promise.reject(error)
 })
