@@ -19,14 +19,14 @@
       <more-action @dislike="dislikeOrReport($event,'dislike')" @report="dislikeOrReport($event,'report')"></more-action>
     </van-popup>
     <van-action-sheet :round="false" title="编辑频道" v-model="showChannelEdit">
-      <channel-edit :channels="channels" @selectChannel="selectChannel" :activeIndex="activeIndex"></channel-edit>
+      <channel-edit :channels="channels" @selectChannel="selectChannel" :activeIndex="activeIndex" @delChannel="delChannel"></channel-edit>
     </van-action-sheet><channel-edit v-model="showChannelEdit"></channel-edit>
   </div>
 </template>
 
 <script>
 import ArticleList from './components/article-list'
-import { getMyChannels } from '@/api/channel'
+import { getMyChannels, delChannel } from '@/api/channel'
 import MoreAction from './components/more-action'
 import { disLikeArticle, reportArticle } from '@/api/article'
 import eventBus from '@/utils/eventBus'
@@ -47,6 +47,21 @@ export default {
     this.getMyChannels()
   },
   methods: {
+    // 实现删除本地频道并切换索引及删除自身数据
+    async delChannel (id) {
+      try {
+        await delChannel(id)
+        let index = this.channels.findIndex(item => item.id === id)
+        if (index <= this.activeIndex) {
+          this.activeIndex = this.activeIndex - 1
+        }
+        if (index > -1) {
+          this.channels.splice(index, 1)
+        }
+      } catch (err) {
+        this.$mynotify({ type: 'danger', message: '删除频道失败' })
+      }
+    },
     // 切换到对应频道
     selectChannel (id) {
       // 获取切换频道的索引并关闭弹窗
