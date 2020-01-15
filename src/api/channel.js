@@ -38,6 +38,17 @@ export function delChannel (id) {
   })
 }
 
+// 添加我的频道API
+export function addChannel (channel) {
+  return new Promise(function (resolve, reject) {
+    let key = store.state.user.token ? CACHE_CHANNEL_U : CACHE_CHANNEL_T
+    let channels = JSON.parse(localStorage.getItem(key))
+    channels.push(channel)
+    localStorage.setItem(key, JSON.stringify(channels))
+    resolve()
+  })
+}
+
 // 获取所有频道
 export function getAllChannels () {
   return request({

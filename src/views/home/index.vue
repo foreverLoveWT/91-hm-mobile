@@ -19,14 +19,14 @@
       <more-action @dislike="dislikeOrReport($event,'dislike')" @report="dislikeOrReport($event,'report')"></more-action>
     </van-popup>
     <van-action-sheet :round="false" title="编辑频道" v-model="showChannelEdit">
-      <channel-edit :channels="channels" @selectChannel="selectChannel" :activeIndex="activeIndex" @delChannel="delChannel"></channel-edit>
+      <channel-edit :channels="channels" @selectChannel="selectChannel" :activeIndex="activeIndex" @delChannel="delChannel" @addChannel="addChannel"></channel-edit>
     </van-action-sheet><channel-edit v-model="showChannelEdit"></channel-edit>
   </div>
 </template>
 
 <script>
 import ArticleList from './components/article-list'
-import { getMyChannels, delChannel } from '@/api/channel'
+import { getMyChannels, delChannel, addChannel } from '@/api/channel'
 import MoreAction from './components/more-action'
 import { disLikeArticle, reportArticle } from '@/api/article'
 import eventBus from '@/utils/eventBus'
@@ -47,6 +47,11 @@ export default {
     this.getMyChannels()
   },
   methods: {
+    // 添加我的频道
+    async addChannel (channel) {
+      await addChannel(channel)
+      this.channels.push(channel)
+    },
     // 实现删除本地频道并切换索引及删除自身数据
     async delChannel (id) {
       try {
