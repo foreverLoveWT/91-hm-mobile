@@ -5,3 +5,11 @@ export function getArticles (params) {
     params: { with_top: 1, ...params }
   })
 }
+// 不感兴趣接口
+export function disLikeArticle (data) {
+  return request({
+    url: '/article/dislikes',
+    data,
+    method: 'POST'
+  })
+}

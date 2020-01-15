@@ -6,18 +6,18 @@
           <div class="article_item">
             <h3 class="van-ellipsis">{{article.title}}</h3>
             <div class="img_box" v-if="article.cover.type===3">
-              <van-image class="w33" fit="cover" :src="article.cover.images[0]" />
-              <van-image class="w33" fit="cover" :src="article.cover.images[1]" />
-              <van-image class="w33" fit="cover" :src="article.cover.images[2]" />
+              <van-image lazy-load class="w33" fit="cover" :src="article.cover.images[0]" />
+              <van-image lazy-load class="w33" fit="cover" :src="article.cover.images[1]" />
+              <van-image lazy-load class="w33" fit="cover" :src="article.cover.images[2]" />
             </div>
             <div class="img_box" v-if="article.cover.type===1">
-              <van-image class="w100" fit="cover" :src="article.cover.images[0]" />
+              <van-image lazy-load class="w100" fit="cover" :src="article.cover.images[0]" />
             </div>
             <div class="info_box">
               <span>{{article.aut_name}}</span>
               <span>{{article.comm_count}}评论</span>
               <span>{{article.pubdate|relTime}}</span>
-              <span class="close">
+              <span class="close" v-if="user.token" @click="$emit('showMoreAction',article.art_id.toString())">
                 <van-icon name="cross"></van-icon>
               </span>
             </div>
@@ -30,6 +30,8 @@
 
 <script>
 import { getArticles } from '@/api/article'
+import { mapState } from 'vuex'
+import eventBus from '@/utils/eventBus'
 export default {
   name: 'article-list',
   props: {
@@ -38,6 +40,9 @@ export default {
       type: Number,
       default: null
     }
+  },
+  computed: {
+    ...mapState(['user'])
   },
   data () {
     return {
@@ -48,6 +53,16 @@ export default {
       articles: [],
       timestamp: null
     }
+  },
+  created () {
+    eventBus.$on('delArticle', (articleId, channelId) => {
+      if (this.channel_id === channelId) {
+        let index = this.articles.findIndex(item => item.art_id.toString() === articleId)
+        if (index > -1) {
+          this.articles.splice(index, 1)
+        }
+      }
+    })
   },
   methods: {
     // 上拉加载
