@@ -22,3 +22,25 @@ export function reportArticle (data) {
     method: 'POST'
   })
 }
+
+// 获取文章搜索
+export function suggestion (params) {
+  return request({
+    url: '/suggestion',
+    params
+  })
+}
+
+// 获取文章搜索结果
+export function searchArticle (params) {
+  return request({
+    url: '/search',
+    params
+  })
+}
+// 获取文章详情
+export function getArticleInfo (id) {
+  return request({
+    url: `/articles/${id}`
+  })
+}
