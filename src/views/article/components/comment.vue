@@ -1,26 +1,26 @@
 <template>
   <div class="comment">
-    <van-list v-model="loading" :finished="finished" finished-text="没有更多了">
-      <div class="item van-hairline--bottom van-hairline--top" v-for="index in 5" :key="index">
+    <van-list @load="onLoad"  v-model="loading" :finished="finished" finished-text="没有更多了">
+      <div class="item van-hairline--bottom van-hairline--top" v-for="comment in comments" :key="comment.com_id.toString()">
         <van-image
           round
           width="1rem"
           height="1rem"
           fit="fill"
-          src="https://img.yzcdn.cn/vant/cat.jpeg"
+          :src="comment.aut_photo"
         />
         <div class="info">
           <p>
-            <span class="name">一阵清风</span>
+            <span class="name">{{ comment.aut_name }}</span>
             <span style="float:right">
               <span class="van-icon van-icon-good-job-o zan"></span>
-              <span class="count">10</span>
+              <span class="count">{{ comment.like_count }}</span>
             </span>
           </p>
-          <p>评论的内容，。。。。</p>
+          <p>{{ comment.content }}</p>
           <p>
-            <span class="time">两天内</span>&nbsp;
-            <van-tag plain @click="showReply=true">4 回复</van-tag>
+            <span class="time">{{ comment.pubdate | relTime   }}</span>&nbsp;
+            <van-tag plain @click="openReply(comment.com_id)">{{ comment.reply_count }} 回复</van-tag>
           </p>
         </div>
       </div>
@@ -31,12 +31,26 @@
         <span class="submit" v-else slot="button">提交</span>
       </van-field>
     </div>
+    <!-- 回复 -->
+    <van-action-sheet v-model="showReply" :round="false" class="reply_dialog" title="回复评论">
+      <van-list @load="getReply" :immediate-check="false" v-model="reply.loading" :finished="reply.finished" finished-text="没有更多了">
+        <div class="item van-hairline--bottom van-hairline--top" v-for="reply in reply.list" :key="reply.com_id.toString()">
+          <van-image round width="1rem" height="1rem" fit="fill" :src="reply.aut_photo" />
+          <div class="info">
+            <p><span class="name">{{reply.aut_name}}</span></p>
+            <p>{{reply.content}}</p>
+            <p><span class="time">{{reply.pubdate|relTime}}</span></p>
+          </div>
+        </div>
+      </van-list>
+    </van-action-sheet>
   </div>
 
   <!-- 都不输入框 -->
 </template>
 
 <script>
+import { getComments } from '@/api/article'
 export default {
   data () {
     return {
@@ -47,7 +61,55 @@ export default {
       // 输入的内容
       value: '',
       // 控制提交中状态数据
-      submiting: false
+      submiting: false,
+      comments: [],
+      offset: null,
+      showReply: false,
+      reply: {
+        loading: false,
+        finished: false,
+        offset: null,
+        list: [],
+        commentId: null
+      }
+    }
+  },
+  methods: {
+    openReply (commentId) {
+      this.showReply = true
+      this.reply.commentId = commentId
+      this.reply.list = []
+      this.reply.offset = null
+      this.reply.loading = true
+      this.reply.finished = false
+      this.getReply()
+    },
+    async getReply () {
+      let data = await getComments({
+        type: 'c',
+        offset: this.reply.offset,
+        source: this.reply.commentId.toString()
+      })
+      this.reply.list.push(...data.results)
+      this.reply.loading = false
+      this.reply.finished = data.end_id === data.last_id
+      if (!this.reply.finished) {
+        this.reply.offset = data.last_id
+      }
+    },
+    async onLoad () {
+      let data = await getComments({
+        type: 'a',
+        offset: this.offset,
+        source: this.$route.query.articleId
+      })
+      console.log(data)
+      this.comments.push(...data.results)
+      this.loading = false
+      this.finished = data.last_id === data.end_id
+      if (!this.finished) {
+        this.offset = data.last_id
+      }
     }
   }
 }
@@ -98,6 +160,25 @@ export default {
   .submit {
     font-size: 12px;
     color: #3296fa;
+  }
+}
+.reply_dialog {
+  height: 100%;
+  max-height: 100%;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  .van-action-sheet__header {
+    background: #3296fa;
+    color: #fff;
+    .van-icon-close {
+      color: #fff;
+    }
+  }
+  .van-action-sheet__content{
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 10px 44px;
   }
 }
 </style>
