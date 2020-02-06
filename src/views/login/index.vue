@@ -60,7 +60,7 @@ export default {
       if (this.checkMobile() && this.checkCode()) {
         const data = await login(this.loginForm)
         this.updateUser({ user: data })
-        this.$notify({ type: 'success', message: '登陆成功' })
+        this.$mynotify({ type: 'success', message: '登陆成功' })
         let { redirectUrl } = this.$route.query
         this.$router.push(redirectUrl || '/')
       }

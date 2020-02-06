@@ -36,9 +36,12 @@ instance.interceptors.response.use(function (response) {
   }
 }, async function (error) {
   if (error.response && error.response.status === 401) {
-    let toPath = { path: '/login', query: { redirectUrl: router.currentRouter.path } }
+    let toPath = { path: '/login', query: { redirectUrl: router.currentRoute.fullPath } }
+    //   表示token过期 先判断 是否有refresh_token
     if (store.state.user.refresh_token) {
       try {
+        //   应该发送一个请求 换取新的token
+      // 这里不应该再用instance  因为 instance会再次进入拦截器  用默认的axios
         let result = await axios({
           url: 'http://ttapi.research.itcast.cn/app/v1_0/authorizations',
           method: 'put',
@@ -46,12 +49,13 @@ instance.interceptors.response.use(function (response) {
         })
         store.commit('updateUser', {
           user: {
-            token: result.data.data.token,
+            token: result.data.data.token, // 拿到新的token之后
             refresh_token: store.state.user.refresh_token
           }
         })
         return instance(error.config)
       } catch (error) {
+        //  如果错误 表示补救措施也没用了 应该跳转到登录页 并且 把废掉的user全都干掉
         store.commit('clearUser')
         router.push(toPath)
       }

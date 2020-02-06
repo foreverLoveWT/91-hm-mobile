@@ -26,13 +26,13 @@
       </div>
     </van-list>
     <div class="reply-container van-hairline--top">
-      <van-field v-model="value" placeholder="写评论...">
+      <van-field v-model.trim="value" placeholder="写评论...">
         <van-loading v-if="submiting" slot="button" type="spinner" size="16px"></van-loading>
-        <span class="submit" v-else slot="button">提交</span>
+        <span class="submit" v-else slot="button" @click="submit()">提交</span>
       </van-field>
     </div>
     <!-- 回复 -->
-    <van-action-sheet v-model="showReply" :round="false" class="reply_dialog" title="回复评论">
+    <van-action-sheet @closed="reply.commentId=null" v-model="showReply" :round="false" class="reply_dialog" title="回复评论">
       <van-list @load="getReply" :immediate-check="false" v-model="reply.loading" :finished="reply.finished" finished-text="没有更多了">
         <div class="item van-hairline--bottom van-hairline--top" v-for="reply in reply.list" :key="reply.com_id.toString()">
           <van-image round width="1rem" height="1rem" fit="fill" :src="reply.aut_photo" />
@@ -50,7 +50,7 @@
 </template>
 
 <script>
-import { getComments } from '@/api/article'
+import { getComments, commentOrReply } from '@/api/article'
 export default {
   data () {
     return {
@@ -75,6 +75,35 @@ export default {
     }
   },
   methods: {
+    // 提交评论
+    async submit () {
+      if (!this.value) return false
+      this.submiting = true
+      await this.$sleep()
+      try {
+        const data = await commentOrReply({
+          target: this.reply.commentId ? this.reply.commentId.toString() : this.$route.query.articleId,
+          content: this.value,
+          art_id: this.reply.commentId ? this.$route.query.articleId : null
+        })
+        // console.log(data)
+        if (this.reply.commentId) {
+          this.reply.list.unshift(data.new_obj)
+          // 如果对评论的进行评论之后, 应该找到该评论 并将 该评论的回复次数 +1
+          // 怎么找到 对应的评论
+          // 如果找到了 comment就是找到的对象 如果找不到 comment就是一个undefined
+          const comment = this.comments.find(item => item.com_id.toString() === this.reply.commentId.toString())
+          comment && comment.reply_count++
+        } else {
+          this.comments.unshift(data.new_obj)
+        }
+        this.value = ''
+      } catch (error) {
+        this.$mynotify({ type: 'danger', message: '评论失败' })
+      }
+      this.submiting = false
+    },
+    // 打开对话框重置数据
     openReply (commentId) {
       this.showReply = true
       this.reply.commentId = commentId
@@ -84,6 +113,7 @@ export default {
       this.reply.finished = false
       this.getReply()
     },
+    // 获取文章评论回复
     async getReply () {
       let data = await getComments({
         type: 'c',
@@ -97,13 +127,14 @@ export default {
         this.reply.offset = data.last_id
       }
     },
+    // 获取文章评论
     async onLoad () {
       let data = await getComments({
         type: 'a',
         offset: this.offset,
         source: this.$route.query.articleId
       })
-      console.log(data)
+      // console.log(data)
       this.comments.push(...data.results)
       this.loading = false
       this.finished = data.last_id === data.end_id
