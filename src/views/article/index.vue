@@ -60,7 +60,7 @@ export default {
         this.article.is_followed = !this.article.is_followed
         this.$mynotify({ type: 'success', message: '操作成功' })
       } catch (error) {
-        this.$gnotify({ type: 'danger', message: '操作失败' })
+        this.$mynotify({ type: 'danger', message: '操作失败' })
       }
     }
   }
