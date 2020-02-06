@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <van-nav-bar left-arrow title="编辑资料" right-text="保存" @click-left="$router.back()"></van-nav-bar>
+    <van-nav-bar left-arrow title="编辑资料" right-text="保存"  @click-right="saveUser" @click-left="$router.back()"></van-nav-bar>
     <van-cell-group>
       <van-cell is-link title="头像"  center>
         <van-image
@@ -50,7 +50,7 @@
 
 <script>
 import dayjs from 'dayjs'
-import { getUserProfile, updateImg } from '@/api/user'
+import { getUserProfile, updateImg, saveUserInfo } from '@/api/user'
 export default {
   name: 'user-profile',
   data () {
@@ -112,6 +112,16 @@ export default {
       let result = await updateImg(data)
       this.user.photo = result.photo
       this.showPhoto = false
+    },
+    // 保存用户编辑
+    async saveUser () {
+      try {
+        await saveUserInfo({ ...this.user, photo: null })
+        this.$mynotify({ type: 'success', message: '保存成功' })
+        this.$router.push('/user')
+      } catch (error) {
+        this.$mynotify({ type: 'danger', message: '保存失败' })
+      }
     }
   }
 }
