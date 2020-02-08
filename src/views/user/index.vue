@@ -30,13 +30,13 @@
     </div>
     <van-row class="user-links">
       <van-col span="8">
-        <van-icon name="newspaper-o" color="#7af"/>我的作品
+        <van-icon name="newspaper-o" color="#7af" />我的作品
       </van-col>
       <van-col span="8">
-        <van-icon name="star-o" color="#f00"/>我的收藏
+        <van-icon name="star-o" color="#f00" />我的收藏
       </van-col>
       <van-col span="8">
-        <van-icon name="tosend" color="#fa0"/>阅读历史
+        <van-icon name="tosend" color="#fa0" />阅读历史
       </van-col>
     </van-row>
 
@@ -63,9 +63,10 @@ export default {
     this.getUserInfo()
   },
   methods: {
-    ...mapMutations(['clearUser']),
+    ...mapMutations(['clearUser', 'updatePhoto']),
     async getUserInfo () {
       this.userInfo = await getUserInfo()
+      this.updatePhoto({ photo: this.userInfo.photo })
     },
     // 退出登录
     async lgout () {
@@ -76,9 +77,7 @@ export default {
         })
         this.clearUser()
         this.$router.push('/login')
-      } catch (error) {
-
-      }
+      } catch (error) {}
     }
   }
 }
@@ -96,7 +95,7 @@ export default {
       display: flex;
       padding: 20px;
       align-items: center;
-      .van-image{
+      .van-image {
         width: 64px;
         height: 64px;
       }
@@ -110,7 +109,7 @@ export default {
         color: #3296fa;
       }
     }
-    p{
+    p {
       margin: 0;
       text-align: center;
     }

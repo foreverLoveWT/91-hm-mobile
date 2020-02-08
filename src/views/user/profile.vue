@@ -51,6 +51,7 @@
 <script>
 import dayjs from 'dayjs'
 import { getUserProfile, updateImg, saveUserInfo } from '@/api/user'
+import { mapMutations } from 'vuex'
 export default {
   name: 'user-profile',
   data () {
@@ -75,6 +76,7 @@ export default {
     this.getUserProfile()
   },
   methods: {
+    ...mapMutations(['updatePhoto']),
     // 昵称点击事件
     btnName () {
       if (this.user.name.length < 1 || this.user.name.length > 7) {
@@ -97,9 +99,11 @@ export default {
       this.showBirthDay = true
       this.currentDate = new Date(this.user.birthday)
     },
+    // 获取用户信息
     async getUserProfile () {
       let data = await getUserProfile()
       this.user = data
+      this.updatePhoto({ photo: this.user.photo })
     },
     // 图片文件上传
     openChangeFile () {
@@ -112,6 +116,8 @@ export default {
       let result = await updateImg(data)
       this.user.photo = result.photo
       this.showPhoto = false
+      //  当头像上传成功之后 把上传成功的头像的地址 设置给state
+      this.updatePhoto({ photo: result.photo })
     },
     // 保存用户编辑
     async saveUser () {
