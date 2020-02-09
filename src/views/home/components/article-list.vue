@@ -1,5 +1,5 @@
 <template>
-  <div class="scroll-wrapper">
+  <div ref="myScroll" class="scroll-wrapper" @scroll="remember">
     <van-pull-refresh v-model="downLoading" @refresh="onRefresh" :success-text="refreshSuccessText">
       <van-list v-model="upLoading" :finished="finished" @load="onLoad" finished-text="没有更多了">
         <van-cell :to="`/article?articleId=${article.art_id.toString()}`" v-for="article in articles" :key="article.art_id.toString()">
@@ -51,7 +51,8 @@ export default {
       upLoading: false,
       finished: false,
       articles: [],
-      timestamp: null
+      timestamp: null,
+      scrollTop: 0
     }
   },
   created () {
@@ -63,8 +64,27 @@ export default {
         }
       }
     })
+    // 监听切换事件，并且判断切换的id是否等于article-list接收的频道id , 如果相等, 就滚动到对应的滚动条
+    eventBus.$on('changeTab', (id) => {
+      if (id === this.channel_id) {
+        this.$nextTick(() => {
+          if (this.scrollTop && this.$refs.myScroll) {
+            this.$$refs.myScroll.scrollTop = this.scrollTop
+          }
+        })
+      }
+    })
+  },
+  activated () {
+    if (this.scrollTop && this.$refs.myScroll) {
+      this.$refs.myScroll.scrollTop = this.scrollTop
+    }
   },
   methods: {
+    // 页面滚动记忆
+    remember (event) {
+      this.scrollTop = event.target.scrollTop
+    },
     // 上拉加载
     async onLoad () {
       await this.$sleep()

@@ -2,7 +2,10 @@
   <div id="app">
     <div id="nav">
     </div>
-    <router-view/>
+    <keep-alive >
+      <router-view v-if="$route.meta.isAlive" />
+    </keep-alive>
+    <router-view v-if="!$route.meta.isAlive" />
   </div>
 </template>
 

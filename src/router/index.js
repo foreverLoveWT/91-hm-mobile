@@ -21,7 +21,7 @@ const routes = [
     path: '/',
     component: Layout,
     children: [
-      { path: '/', name: 'home', component: Home },
+      { path: '/', name: 'home', component: Home, meta: { isAlive: true } },
       { path: '/question', name: 'question', component: Question },
       { path: '/video', name: 'video', component: Video },
       { path: '/user', name: 'user', component: User }

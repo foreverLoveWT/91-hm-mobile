@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <van-tabs v-model="activeIndex" swipeable>
+    <van-tabs v-model="activeIndex" swipeable @change="changeTab">
       <van-tab :title="channel.name" v-for="channel in channels" :key="channel.id">
         <!-- 这里注意 这个div设置了滚动条 目的是 给后面做 阅读记忆 留下伏笔 -->
         <!-- 阅读记忆 => 看文章看到一半 滑到中部 去了别的页面 当你回来时 文章还在你看的位置 -->
@@ -47,6 +47,10 @@ export default {
     this.getMyChannels()
   },
   methods: {
+    // 监听切换栏
+    changeTab () {
+      eventBus.$$emit('changeTab', this.channels[this.activeIndex].id)
+    },
     // 添加我的频道
     async addChannel (channel) {
       await addChannel(channel)
