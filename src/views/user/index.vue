@@ -2,7 +2,7 @@
   <div class="container">
     <div class="user-profile">
       <div class="info">
-        <van-image round src="https://img.yzcdn.cn/vant/cat.jpeg" />
+        <van-image round :src="userInfo.photo" />
         <h3 class="name">
           {{userInfo.name}}
           <br />

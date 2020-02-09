@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <van-nav-bar left-arrow title="小智同学" @click-left="$router.back()"></van-nav-bar>
-    <div class="chat-list">
+    <div class="chat-list" ref="myList">
      <div :class="{ left: item.name === 'xz', right: item.name!='xz' }"  class="chat-item" v-for="(item,index)  in list" :key="index">
         <!-- 小智同学的图片 -->
         <!-- 需要根据item中的name值 决定是否显示 左侧的图片 或者右侧的图片 -->
@@ -16,7 +16,7 @@
       </div> -->
     </div>
     <div class="reply-container van-hairline--top">
-      <van-field v-model="value" placeholder="说点什么...">
+      <van-field v-model.trim="value" placeholder="说点什么...">
         <van-loading v-if="loading" slot="button" type="spinner" size="16px"></van-loading>
         <span v-else @click="send()" slot="button" style="font-size:12px;color:#999">提交</span>
       </van-field>
@@ -29,10 +29,10 @@ import XZImg from '@/assets/xz.jpg'
 import { mapState } from 'vuex'
 import io from 'socket.io-client'
 export default {
+  name: 'user-chat',
   computed: {
     ...mapState(['photo', 'user'])
   },
-  name: 'user-chat',
   data () {
     return {
       value: '',
@@ -58,10 +58,33 @@ export default {
     })
     this.socket.on('message', (data) => {
       this.list.push({ ...data, name: 'xz' }) // name:xz相当于 给我们的消息记录一下 谁发了这个消息
+      this.scrollBottom()
     })
   },
+  // 在退出页面之前,我们要将连接关闭
+  // beforeDestroy => 钩子函数  =>  在页面销毁之前触发
+  beforeDestroy () {
+    this.socket.close()
+  },
   methods: {
-    send () {}
+    // 定义一个滚动的方法
+    scrollBottom () {
+      this.$nextTick(() => {
+        this.$refs.myList.scrollTop = this.$refs.myList.scrollHeight
+      })
+    },
+    async send () {
+      if (!this.value) return false
+      // 设置一下时间的间隔
+      // 默认时间是500毫秒
+      await this.$sleep()
+      this.loading = true
+      let obj = { msg: this.value, timestape: Date.now() }
+      this.socket.emit('message', obj)// 发送信息
+      this.list.push(obj)
+      this.scrollBottom()
+      this.value = ''
+    }
   }
 }
 </script>
