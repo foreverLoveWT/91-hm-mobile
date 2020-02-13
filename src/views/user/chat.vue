@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <van-nav-bar left-arrow title="小智同学" @click-left="$router.back()"></van-nav-bar>
+    <van-nav-bar fixed left-arrow title="小智同学" @click-left="$router.back()"></van-nav-bar>
     <div class="chat-list" ref="myList">
      <div :class="{ left: item.name === 'xz', right: item.name!='xz' }"  class="chat-item" v-for="(item,index)  in list" :key="index">
         <!-- 小智同学的图片 -->
@@ -82,15 +82,18 @@ export default {
       let obj = { msg: this.value, timestape: Date.now() }
       this.socket.emit('message', obj)// 发送信息
       this.list.push(obj)
-      this.scrollBottom()
+      // 清空内容
       this.value = ''
+      // 恢复状态
+      this.loading = false
+      this.scrollBottom()
     }
   }
 }
 </script>
 
 <style lang="less" scoped>
-  .container {
+.container {
   height: 100%;
   width: 100%;
   position: absolute;
